@@ -1,16 +1,25 @@
 require('dotenv').config()
 
 const express = require('express');
+const mongoose = require('mongoose');
+const contentRouter = require("./route/content-route");
+
 const app = express();
-const port = 3000;
-const initRoutes = require("./route/router");
-const mongoose = require("mongoose");
 
-mongoose.connect(process.env.MONGO_URI + '/' + process.env.MONGO_DB);
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true });
+const con = mongoose.connection;
+app.use(express.json());
+try {
+    con.on('open', () => {
+        console.log('connected');
+    })
+} catch (error) {
+    console.log("Error: " + error);
+}
 
-app.use(express.urlencoded({ extended: true }));
-initRoutes(app);
+app.use('/ccontent', contentRouter);
 
-app.listen(port, () => {
-    console.log(`Running at.... http://localhost:${port}`)
+
+app.listen(process.env.SERVER_PORT, () => {
+    console.log(`Running at.... http://${process.env.SERVER_URL}:${process.env.SERVER_PORT}`)
 });
